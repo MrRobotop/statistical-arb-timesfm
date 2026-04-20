@@ -129,8 +129,8 @@ To solve the "Beta Drift" problem outlined in Chapter 1, PairsTrader discards th
 At every new market close, the filter updates its belief:
 
 *   **Predict**: 
-    $$ \hat{\theta}_{t|t-1} = \hat{\theta}_{t-1} $$
-    $$ P_{t|t-1} = P_{t-1} + Q $$
+    $$\hat{\theta}_{t|t-1} = \hat{\theta}_{t-1}$$
+    $$P_{t|t-1} = P_{t-1} + Q$$
     *(We predict the state will be exactly what it was yesterday, but we increase our uncertainty $P$ by $Q$).*
 
 *   **Update**: 
