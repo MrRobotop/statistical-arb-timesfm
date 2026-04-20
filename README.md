@@ -128,16 +128,16 @@ To solve the "Beta Drift" problem outlined in Chapter 1, PairsTrader discards th
 **2. The Recursive Update Cycle:**
 At every new market close, the filter updates its belief:
 
-*   **Predict**: 
-    $\hat{\theta}_{t|t-1} = \hat{\theta}_{t-1}$
-    $P_{t|t-1} = P_{t-1} + Q$
-    *(We predict the state will be exactly what it was yesterday, but we increase our uncertainty $P$ by $Q$).*
+* **Predict**:  
+  \(\hat{\theta}_{t|t-1} = \hat{\theta}_{t-1}\)  
+  \(P_{t|t-1} = P_{t-1} + Q\)  
+  *(We predict the state will be exactly what it was yesterday, but we increase our uncertainty \(P\) by \(Q\).)*
 
-*   **Update**: 
-    $$ e_t = y_t - H_t \hat{\theta}_{t|t-1} \quad \text{(The Innovation / The Dynamic Spread)} $$
-    $$ K_t = P_{t|t-1} H_t^T (H_t P_{t|t-1} H_t^T + R)^{-1} \quad \text{(The Kalman Gain)} $$
-    $$ \hat{\theta}_t = \hat{\theta}_{t|t-1} + K_t e_t \quad \text{(The New State)} $$
-    $$ P_t = (I - K_t H_t) P_{t|t-1} \quad \text{(The Updated Uncertainty)} $$
+* **Update**:  
+  \(e_t = y_t - H_t \hat{\theta}_{t|t-1}\) (The Innovation / The Dynamic Spread)  
+  \(K_t = P_{t|t-1} H_t^T (H_t P_{t|t-1} H_t^T + R)^{-1}\) (The Kalman Gain)  
+  \(\hat{\theta}_t = \hat{\theta}_{t|t-1} + K_t e_t\) (The New State)  
+  \(P_t = (I - K_t H_t) P_{t|t-1}\) (The Updated Uncertainty)
 
 The resulting innovation, $e_t$, is our new, highly stationary spread, immune to long-term drift.
 
