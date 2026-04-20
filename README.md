@@ -19,12 +19,12 @@ At its core, PairsTrader formalizes pairs trading as a problem in dynamic state 
 
 ## Chapter 1: The Vision and The Quantitative Challenge
 
-Statistical arbitrage, and specifically pairs trading, is a cornerstone of market-neutral quantitative finance. The canonical idea is to identify two assets whose prices exhibit a stable long-run equilibrium relationship and to take offsetting positions when the instantaneous deviation from that equilibrium becomes statistically large. In practice, this is implemented by shorting the relatively expensive asset and going long the relatively cheap one, with the expectation that the price ratio will revert toward its historical mean.
+Statistical arbitrage, and specifically pairs trading, is a cornerstone of market-neutral quantitative finance. The idea is to identify two assets whose prices exhibit a stable long-run equilibrium relationship and to take offsetting positions when the instantaneous deviation from that equilibrium becomes statistically large. In practice, this is implemented by shorting the relatively expensive asset and going long on the relatively cheap one, with the expectation that the price ratio will revert toward its historical mean.
 
 From a theoretical perspective, this approach implicitly assumes that the joint distribution of the two assets is stable over time and that the equilibrium relationship can be estimated once and then treated as invariant. Many retail and naive institutional implementations rely on a single fixed hedge ratio estimated over a historical lookback window. This creates an illusion of stability that fails once macroeconomic regimes, liquidity conditions, or microstructure frictions begin to evolve in ways that were not present in the calibration sample.
 
 ### The Scientific Challenge: Non-Stationarity
-In real markets, returns and price relationships are not stationary, even over moderate horizons. Structural breaks, gradual drifts in business fundamentals, and shifts in monetary policy all induce time variation in parameters that are often treated as constants in textbook treatments of pairs trading. The assumption that a hedge ratio estimated using Ordinary Least Squares (OLS) over a multiyear window will remain appropriate in future regimes is rarely justified.
+In real markets, returns and price relationships are not stationary, even over moderate horizons. Structural breaks, gradual drifts in business fundamentals, and shifts in monetary policy all induce time variation in parameters that are often treated as constants in textbook treatments of pairs trading. The assumption that a hedge ratio estimated using Ordinary Least Squares (OLS) over a multiyear window will remain appropriate in future regimes, is rarely justified.
 
 The fundamental problem with classic pairs trading is its reliance on static lookback periods and a time-invariant linear relationship. If a quantitative researcher calculates the relationship between Coca-Cola (KO) and Pepsi (PEP) over a 5‑year sample using OLS, that estimate implicitly encodes all macroeconomic conditions, competitive dynamics, and sector-specific effects that prevailed during that specific interval. Once those conditions evolve, the original hedge ratio becomes a stale sufficient statistic that no longer describes the current equilibrium.
 
@@ -96,13 +96,13 @@ The separation between `pipeline`, `api`, and `frontend` permits independent evo
 
 ## Chapter 3: The Mathematical Foundations in Detail
 
-The core edge of PairsTrader lies in its rigorous, three-stage mathematical pipeline. Below, we break down the explicit formulas and notations driving the logic.
+The core edge of PairsTrader lies in its rigorous, three-stage mathematical pipeline. Below, I break down the explicit formulas and notations driving the logic.
 
 ### Phase I: Cointegration Discovery (The Engle-Granger Method)
-Before deploying capital, we must prove mathematically that two assets are "economically tied." We use the Engle-Granger two-step method to test for **Cointegration**.
+Before deploying capital, I must prove mathematically that two assets are "economically tied." I used the Engle-Granger two-step method to test for **Cointegration**.
 
 **1. The Log-Price Regression:**
-We estimate the long-term equilibrium relationship between Asset A and Asset B:
+I estimated the long-term equilibrium relationship between Asset A and Asset B:
 
 $$ \ln(P_{A,t}) = \alpha + \beta \ln(P_{B,t}) + \epsilon_t $$
 
@@ -112,7 +112,7 @@ $$ \ln(P_{A,t}) = \alpha + \beta \ln(P_{B,t}) + \epsilon_t $$
 *   $\epsilon_t$ is the residual error, representing the **Spread**.
 
 **2. The Stationarity Test (Augmented Dickey-Fuller):**
-We must prove that the spread ($\epsilon_t$) does not wander infinitely, but rather reverts to a mean of zero. We perform an ADF test on the residuals:
+To prove that the spread ($\epsilon_t$) does not wander infinitely, but rather reverts to a mean of zero. I performed an ADF test on the residuals:
 
 $$ \Delta \epsilon_t = \zeta \epsilon_{t-1} + \sum_{i=1}^p \delta_i \Delta \epsilon_{t-i} + \nu_t $$
 
@@ -120,7 +120,7 @@ $$ \Delta \epsilon_t = \zeta \epsilon_{t-1} + \sum_{i=1}^p \delta_i \Delta \epsi
 *   $\zeta$ is the test coefficient. If $\zeta$ is significantly negative, the spread exhibits mean-reverting behavior.
 *   $p$ represents the number of lagged difference terms added to remove serial correlation.
 *   $\nu_t$ is white noise.
-*   **Decision Rule**: If the p-value associated with $\zeta$ is less than 0.05, we reject the null hypothesis of a unit root. The pairs are deemed **Cointegrated**.
+*   **Decision Rule**: If the p-value associated with $\zeta$ is less than 0.05, it rejects the null hypothesis of a unit root. The pairs are deemed **Cointegrated**.
 
 ### Phase II: Recursive State-Space Modeling (The Kalman Filter)
 To solve the "Beta Drift" problem outlined in Chapter 1, PairsTrader discards the static OLS $\beta$ and models the relationship as a hidden, evolving state using a **Kalman Filter**.
@@ -142,7 +142,7 @@ At every new market close, the filter updates its belief:
 
 - θ̂_{t|t−1} = θ̂_{t−1}
 - P_{t|t−1} = P_{t−1} + Q  
-  (We predict the state will be exactly what it was yesterday, but we increase our uncertainty P by Q.)
+  (I predict that the state will be exactly what it was yesterday, but increase our uncertainty P by Q.)
 
 **Update**
 
@@ -154,7 +154,7 @@ At every new market close, the filter updates its belief:
 The resulting innovation, $e_t$, is our new, highly stationary spread, immune to long-term drift.
 
 ### Phase III: Mean Reversion Dynamics (Ornstein-Uhlenbeck Process)
-We model the spread's behavior as an **Ornstein-Uhlenbeck (OU) Process** to calculate the expected duration of a trade.
+I modelled the spread's behavior as an **Ornstein-Uhlenbeck (OU) Process** to calculate the expected duration of a trade.
 
 $$ dx_t = \lambda(\mu - x_t)dt + \sigma dW_t $$
 
@@ -163,27 +163,27 @@ $$ dx_t = \lambda(\mu - x_t)dt + \sigma dW_t $$
 *   $\lambda$ is the speed of mean reversion.
 *   $dW_t$ is a Wiener process (Brownian motion).
 
-By regressing the spread's change against its lagged value ($\Delta x_t = c + \gamma x_{t-1}$), we estimate $\gamma \approx -\lambda \Delta t$. 
+By regressing the spread's change against its lagged value ($\Delta x_t = c + \gamma x_{t-1}$), I estimated $\gamma \approx -\lambda \Delta t$. 
 
 The **Half-Life** (how long it takes for a deviation to decay by half) is computed as:
 $$ HL = \frac{-\ln(2)}{\gamma} $$
-PairsTrader enforces a strict filter: we only execute trades where $1.0 \le HL \le 252.0$ days, ensuring the strategy does not tie up capital in incredibly slow-reverting trades.
+PairsTrader enforces a strict filter: It only execute trades where $1.0 \le HL \le 252.0$ days, ensuring the strategy does not tie up capital in incredibly slow-reverting trades.
 
 ---
 
 ## Chapter 4: The Importance of TimesFM 2.5
 
-Even with a perfectly stationary Kalman spread, statistical arbitrage is vulnerable to structural breaks (e.g., a sudden acquisition or regulatory change). We need a forward-looking intelligence to validate the trade.
+Even with a perfectly stationary Kalman spread, statistical arbitrage is vulnerable to structural breaks (e.g., a sudden acquisition or regulatory change). It needs a forward-looking intelligence to validate the trade.
 
 **Why Google's TimesFM?**
 Time-series Foundation Model (TimesFM) is a decoder-only transformer model pre-trained on a massive corpus of real-world time-series data (over 100 billion data points). 
 
 1. **Zero-Shot Capability**: Unlike traditional ARIMA or Prophet models that require fitting to the specific historical data of the spread, TimesFM is a *zero-shot* forecaster. It instantly understands the underlying momentum, seasonality, and volatility of the spread without any fine-tuning.
 2. **Patching Architecture**: It breaks time-series data into patches (tokens) of length 32. This allows it to process sequences much faster than traditional transformers while maintaining long-range dependencies.
-3. **Quantile Outputs**: It does not just output a single mean prediction. It outputs 10 quantiles. In PairsTrader, we utilize the 10th (q10) and 90th (q90) percentiles to define a "Confidence Band."
+3. **Quantile Outputs**: It does not just output a single mean prediction. It outputs 10 quantiles. In PairsTrader, it utilize the 10th (q10) and 90th (q90) percentiles to define a "Confidence Band."
 
 **The Logic Gate Implementation**:
-When the system detects a Z-Score < -2.0 (indicating the spread is abnormally low and we should Buy A / Short B), it queries TimesFM.
+When the system detects a Z-Score < -2.0 (indicating the spread is abnormally low and should Buy A / Short B), it queries TimesFM.
 *   If TimesFM's 30-day forecast points **upward** (towards the mean of 0), the signal is **Approved**.
 *   If TimesFM's forecast points **downward** (predicting further divergence), the signal is **Blocked**. This saves the portfolio from catching falling knives.
 
@@ -210,8 +210,8 @@ The build was developed and optimized on an **Apple MacBook Pro (Intel i7, 16GB 
 To ensure the strategy was robust, it underwent exhaustive out-of-sample backtesting from **January 2023 to December 2025**. 
 
 ### The WorldQuant Brain Connection
-To prevent overfitting and validate our proprietary backtesting engine, we modeled the core logic of the Kalman-TimesFM strategy as an Alpha inside **WorldQuant Brain**, a leading institutional platform for quantitative alpha generation.
-*   We cross-validated our internal PnL, slippage modeling (5 bps), and transaction cost calculations (10 bps round-trip) against WorldQuant's institutional-grade simulator. 
+To prevent overfitting and validate our proprietary backtesting engine, the core logic was modelled of the Kalman-TimesFM strategy as an Alpha inside **WorldQuant Brain**, a leading institutional platform for quantitative alpha generation.
+*   I cross-validated our internal PnL, slippage modeling (5 bps), and transaction cost calculations (10 bps round-trip) against WorldQuant's institutional-grade simulator. 
 *   The correlation between our local backtest equity curve and the WorldQuant Brain simulated curve was **0.98**, confirming that our local `pipeline/backtest/engine.py` is highly accurate and free of look-ahead bias.
 
 ### Final Backtest Results (Kalman-Enhanced V/MA)
@@ -236,7 +236,7 @@ Follow these steps to deploy the PairsTrader terminal locally.
 
 ### 1. Prerequisites
 *   **Python**: Version 3.11 or 3.12 (3.13 is currently incompatible with certain PyTorch/TimesFM dependencies).
-*   **Package Manager**: We use `uv` for ultra-fast dependency resolution.
+*   **Package Manager**: Used `uv` for ultra-fast dependency resolution.
 *   **Hardware**: Minimum 8GB RAM.
 
 ### 2. Installation
@@ -299,22 +299,21 @@ python scripts/plot_backtest.py
 
 ## Chapter 8: Future Roadmap & Contributions
 
-PairsTrader is an open-source contribution to the quantitative finance community. We believe the future of alpha discovery lies at the intersection of classical econometrics and modern foundation models. 
+PairsTrader is an open-source contribution to the quantitative finance community. I believe the future of alpha discovery lies at the intersection of classical econometrics and modern foundation models. 
 
 ### Development Roadmap
 1.  **Multivariate Cointegration (Johansen Test)**: Expanding the system from trading pairs to trading baskets of 3+ assets (e.g., trading a specific bank against a basket of its peers).
-2.  **Kalman-TimesFM Hybrid Fusion**: Currently, the systems operate sequentially. We plan to pass the Kalman State Covariance matrix ($P_t$) directly into the TimesFM attention heads as a feature representing "structural uncertainty."
+2.  **Kalman-TimesFM Hybrid Fusion**: Currently, the systems operate sequentially. I plan to pass the Kalman State Covariance matrix ($P_t$) directly into the TimesFM attention heads as a feature representing "structural uncertainty."
 3.  **Live Execution API**: Integrating the Alpaca API for automated, low-latency paper trading and live execution.
 
 ### Contributing
-We actively welcome pull requests from quantitative researchers, data scientists, and engineers.
+I actively welcome pull requests from quantitative researchers, data scientists, and engineers.
 *   **Found a bug?** Open an issue.
 *   **Have a new model?** Add a wrapper in `pipeline/model/loader.py` and submit a PR.
 *   **UI Enhancements**: Feel free to expand the React frontend with new charting tools.
 
 **Author**: Rishabh Patil  
 **Contact / GitHub**: [MrRobotop](https://github.com/MrRobotop)  
-*Quantitative analysis is a science; trading is an art. PairsTrader is the brush.*
 
 ---
 *Disclaimer: This software is for educational and research purposes only. It does not constitute financial advice. Always perform your own due diligence before risking live capital in financial markets.*
