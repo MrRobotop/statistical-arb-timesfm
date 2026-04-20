@@ -1,4 +1,4 @@
-# 📈 PairsTrader: A Scientific Approach to Dynamic Statistical Arbitrage
+# PairsTrader: A Scientific Approach to Dynamic Statistical Arbitrage using WorldQuant Brain
 ### Fusing Recursive Kalman Filtering with Google’s TimesFM 2.5 Foundation Model
 **Author**: Rishabh Patil · **Version**: 2.7 (The Alpha Release)
 
@@ -8,13 +8,13 @@
 [![React](https://img.shields.io/badge/UI-React_18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-PairsTrader is a production-grade quantitative terminal designed for the next generation of statistical arbitrage. This project represents a comprehensive, multi-month scientific effort to bridge the gap between classical econometrics and state-of-the-art machine learning foundation models.
+PairsTrader is a production-grade quantitative terminal designed for the next generation of statistical arbitrage. This project represents a comprehensive scientific and development effort to bridge the gap between classical econometrics and state-of-the-art machine learning foundation models
 
 ![PairsTrader Terminal Dashboard](assets/dashboard.png)
 
 ---
 
-## 📖 Chapter 1: The Vision and The Quantitative Challenge
+## Chapter 1: The Vision and The Quantitative Challenge
 
 Statistical arbitrage—specifically pairs trading—is a cornerstone of market-neutral quantitative finance. The premise is elegant: identify two historically correlated assets, and when their price relationship diverges from the historical norm, short the outperforming asset and buy the underperforming one. The expectation is that the relationship will eventually revert to its historical mean.
 
@@ -32,7 +32,7 @@ The vision for PairsTrader was to build a terminal that attacks the non-stationa
 
 ---
 
-## 🗂️ Chapter 2: Project Architecture and Topology
+## Chapter 2: Project Architecture and Topology
 
 To achieve high throughput, sub-millisecond API responses, and robust backtesting, PairsTrader is engineered with a modular, decoupled architecture.
 
@@ -84,7 +84,7 @@ pairstrader/
 
 ---
 
-## 🧮 Chapter 3: The Mathematical Foundations in Detail
+## Chapter 3: The Mathematical Foundations in Detail
 
 The core edge of PairsTrader lies in its rigorous, three-stage mathematical pipeline. Below, we break down the explicit formulas and notations driving the logic.
 
@@ -159,7 +159,7 @@ PairsTrader enforces a strict filter: we only execute trades where $1.0 \le HL \
 
 ---
 
-## 🧠 Chapter 4: The Importance of TimesFM 2.5
+## Chapter 4: The Importance of TimesFM 2.5
 
 Even with a perfectly stationary Kalman spread, statistical arbitrage is vulnerable to structural breaks (e.g., a sudden acquisition or regulatory change). We need a forward-looking intelligence to validate the trade.
 
@@ -177,7 +177,7 @@ When the system detects a Z-Score < -2.0 (indicating the spread is abnormally lo
 
 ---
 
-## 🛠️ Chapter 5: Engineering and Hardware Optimization
+## Chapter 5: Engineering and Hardware Optimization
 
 Operating a 200 Million parameter model and running continuous recursive matrix math across thousands of data points requires a highly optimized engineering stack.
 
@@ -192,7 +192,7 @@ The build was developed and optimized on an **Apple M2 Max**.
 
 ---
 
-## 🧪 Chapter 6: Evaluation, WorldQuant Brain Validation, and Results
+## Chapter 6: Evaluation, WorldQuant Brain Validation, and Results
 
 To ensure the strategy was robust, it underwent exhaustive out-of-sample backtesting from **January 2023 to December 2025**. 
 
@@ -217,7 +217,7 @@ Testing the high-conviction Visa (V) / Mastercard (MA) pair over the 2-year peri
 
 ---
 
-## 🚀 Chapter 7: Comprehensive Getting Started Guide
+## Chapter 7: Comprehensive Getting Started Guide
 
 Follow these steps to deploy the PairsTrader terminal locally.
 
@@ -284,7 +284,7 @@ python scripts/plot_backtest.py
 
 ---
 
-## 🤝 Chapter 8: Future Roadmap & Contributions
+## Chapter 8: Future Roadmap & Contributions
 
 PairsTrader is an open-source contribution to the quantitative finance community. We believe the future of alpha discovery lies at the intersection of classical econometrics and modern foundation models. 
 
