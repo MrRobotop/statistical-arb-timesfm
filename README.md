@@ -1,6 +1,7 @@
-# PairsTrader: A Scientific Approach to Dynamic Statistical Arbitrage using WorldQuant Brain
+# PairsTrader: A Scientific Approach to Dynamic Statistical Arbitrage using WorldQuantBrain
 ### Fusing Recursive Kalman Filtering with Google’s TimesFM 2.5 Foundation Model
-**Author**: Rishabh Patil · **Version**: 2.7 (The Alpha Release)
+**Purpose**: WorldQuant Assessment 
+**Author/Candidate**: Rishabh Patil · **Version**: 2.7 (The Alpha Release)
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![TimesFM](https://img.shields.io/badge/Model-TimesFM_2.5-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://github.com/google-research/timesfm)
@@ -8,7 +9,9 @@
 [![React](https://img.shields.io/badge/UI-React_18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-PairsTrader is a production-grade quantitative terminal designed for the next generation of statistical arbitrage. This project represents a comprehensive scientific and development effort to bridge the gap between classical econometrics and state-of-the-art machine learning foundation models
+PairsTrader is a production-grade quantitative terminal designed for the next generation of statistical arbitrage workflows. It is intended as an end‑to‑end research, backtesting, and deployment environment using *WorldQuant Brain* methodolgies that combines rigorous econometric methodology with state-of-the-art sequence modeling through time-series foundation models. The project is structured as a fully reproducible research artifact, with explicit attention to statistical validity, computational efficiency, and practical deployability in institutional trading pipelines.
+
+At its core, PairsTrader formalizes pairs trading as a problem in dynamic state estimation and probabilistic forecasting rather than as a static rule-based heuristic. The system explicitly models the latent hedge ratio as an evolving state variable, subjected to regime shifts, and then subjects the resulting spread process to a second layer of scrutiny via a large-scale transformer model trained on diverse real-world time series. The objective is to construct a pipeline that is both statistically grounded and robust to structural breaks and non-stationarity in financial markets.
 
 ![PairsTrader Terminal Dashboard](assets/dashboard.png)
 
@@ -16,25 +19,31 @@ PairsTrader is a production-grade quantitative terminal designed for the next ge
 
 ## Chapter 1: The Vision and The Quantitative Challenge
 
-Statistical arbitrage—specifically pairs trading—is a cornerstone of market-neutral quantitative finance. The premise is elegant: identify two historically correlated assets, and when their price relationship diverges from the historical norm, short the outperforming asset and buy the underperforming one. The expectation is that the relationship will eventually revert to its historical mean.
+Statistical arbitrage, and specifically pairs trading, is a cornerstone of market-neutral quantitative finance. The canonical idea is to identify two assets whose prices exhibit a stable long-run equilibrium relationship and to take offsetting positions when the instantaneous deviation from that equilibrium becomes statistically large. In practice, this is implemented by shorting the relatively expensive asset and going long the relatively cheap one, with the expectation that the price ratio will revert toward its historical mean.
+
+From a theoretical perspective, this approach implicitly assumes that the joint distribution of the two assets is stable over time and that the equilibrium relationship can be estimated once and then treated as invariant. Many retail and naive institutional implementations rely on a single fixed hedge ratio estimated over a historical lookback window. This creates an illusion of stability that fails once macroeconomic regimes, liquidity conditions, or microstructure frictions begin to evolve in ways that were not present in the calibration sample.
 
 ### The Scientific Challenge: Non-Stationarity
-However, the retail and traditional implementation of this strategy often fails due to a fatal flaw in the underlying assumption: **Financial markets are inherently non-stationary.** 
+In real markets, returns and price relationships are not stationary, even over moderate horizons. Structural breaks, gradual drifts in business fundamentals, and shifts in monetary policy all induce time variation in parameters that are often treated as constants in textbook treatments of pairs trading. The assumption that a hedge ratio estimated using Ordinary Least Squares (OLS) over a multiyear window will remain appropriate in future regimes is rarely justified.
 
-The fundamental problem with classic pairs trading is its reliance on static lookback periods. If a quantitative researcher calculates the relationship (the hedge ratio) between Coca-Cola (KO) and Pepsi (PEP) over a 5-year period using Ordinary Least Squares (OLS) regression, they are assuming that the macroeconomic variables, corporate structures, and market microstructures that defined that 5-year period will remain perfectly constant into the future. 
+The fundamental problem with classic pairs trading is its reliance on static lookback periods and a time-invariant linear relationship. If a quantitative researcher calculates the relationship between Coca-Cola (KO) and Pepsi (PEP) over a 5‑year sample using OLS, that estimate implicitly encodes all macroeconomic conditions, competitive dynamics, and sector-specific effects that prevailed during that specific interval. Once those conditions evolve, the original hedge ratio becomes a stale sufficient statistic that no longer describes the current equilibrium.
 
-When market regimes shift (e.g., due to interest rate changes, supply chain shocks, or sector rotations), the static hedge ratio becomes obsolete. This phenomenon, known as **Beta Drift**, causes the spread to stop reverting to the mean. Instead of capturing a temporary divergence, the trader is left holding a structurally diverging, losing position.
+When market regimes shift (for example due to interest rate regime changes, supply chain disruptions, regulatory interventions, or large-scale sector rotations), the static hedge ratio becomes obsolete. This phenomenon, often referred to as **Beta Drift**, manifests as a breakdown in the mean-reversion properties of the spread series. Instead of observing transient deviations followed by reversion, the trader experiences persistent divergence and a slow accumulation of losses that is structurally induced rather than driven by transient noise.
 
 ### The PairsTrader Solution
-The vision for PairsTrader was to build a terminal that attacks the non-stationarity problem from two distinct scientific angles:
-1. **Dynamic Adaptation**: Instead of relying on a static OLS regression, the system uses a **Recursive Bayesian Estimator (Kalman Filter)** to continuously "re-learn" the market regime and update the hedge ratio at every discrete time step.
-2. **Probabilistic Forecasting**: Instead of merely assuming a spread will revert because it is at a statistical extreme (e.g., a Z-score > 2), the system queries **Google's TimesFM 2.5**, a state-of-the-art time-series foundation model, to project the actual future path of the spread with quantile-based confidence intervals.
+
+The vision for PairsTrader is to build a terminal that addresses the non-stationarity problem using a layered, explicitly model-based approach.
+
+1. **Dynamic Adaptation**: Instead of relying on a static OLS regression, the system uses a **Recursive Bayesian Estimator (Kalman Filter)** to model the intercept and hedge ratio as latent state variables that evolve over time. At every discrete time step, the filter updates its posterior estimate of the state based on new observations, which allows the hedge ratio to adapt smoothly to changing market conditions while still enforcing temporal regularization.
+2. **Probabilistic Forecasting**: Instead of merely assuming that a spread will revert because it lies at an extreme Z-score, the system queries **Google's TimesFM 2.5**, a state-of-the-art time-series foundation model, to obtain a full predictive distribution for the future path of the spread. This provides quantile-based confidence intervals that explicitly quantify path uncertainty and permit the construction of logic gates that block trades when the model anticipates further divergence.
+
+Together, these two components transform the classical pairs trading heuristic into a coherent probabilistic decision system. The Kalman layer produces a dynamically adjusted, high-quality spread signal, and the TimesFM layer serves as a forward-looking risk filter that evaluates whether the current deviation is likely to mean revert within a reasonable horizon.
 
 ---
 
 ## Chapter 2: Project Architecture and Topology
 
-To achieve high throughput, sub-millisecond API responses, and robust backtesting, PairsTrader is engineered with a modular, decoupled architecture.
+To achieve high throughput, sub-millisecond API responses, and robust backtesting, PairsTrader is engineered with a modular, decoupled architecture. Each component is responsible for a focused subset of the overall workflow, which simplifies reasoning about failure modes and facilitates unit and integration testing.
 
 ```text
 pairstrader/
@@ -83,6 +92,7 @@ pairstrader/
 ```
 
 ---
+The separation between `pipeline`, `api`, and `frontend` permits independent evolution of the quantitative core, the serving layer, and the user interface. The quantitative logic is pure Python with a strong emphasis on vectorization and reproducibility, the API layer is a thin orchestration surface for model serving and simulation, and the frontend is a visualization layer designed for high information density and rapid exploratory analysis.
 
 ## Chapter 3: The Mathematical Foundations in Detail
 
@@ -183,10 +193,11 @@ When the system detects a Z-Score < -2.0 (indicating the spread is abnormally lo
 
 Operating a 200 Million parameter model and running continuous recursive matrix math across thousands of data points requires a highly optimized engineering stack.
 
-### Apple Silicon Optimization
-The build was developed and optimized on an **Apple M2 Max**. 
-*   **Metal Performance Shaders (MPS)**: PyTorch is configured to route TimesFM matrix multiplications directly to the Apple GPU via the MPS backend, resulting in a 4x inference speedup compared to CPU execution.
-*   **Precision**: `torch.set_float32_matmul_precision("high")` is enforced to balance throughput and numerical stability.
+### CPU Optimization (Apple MacBook Pro)
+
+The build was developed and optimized on an **Apple MacBook Pro (Intel i7, 16GB RAM, 512GB SSD)** with a focus on efficient CPU execution.  
+* **Vectorized PyTorch operations**: TimesFM matrix multiplications and Kalman filter updates are implemented with batched, vectorized operations to maximize CPU throughput without requiring a dedicated GPU.  
+* **Precision**: `torch.set_float32_matmul_precision("high")` is enforced to balance numerical stability and performance on CPU-only workloads.
 
 ### Data Engineering
 *   **Parquet Caching**: Fetching daily OHLCV data from yfinance introduces severe latency and rate-limiting risks. PairsTrader features a local storage engine that compresses historical data into binary `.parquet` files, dropping data load times from seconds to microseconds.
