@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-bloomberg-bg text-bloomberg-text font-mono text-sm antialiased m-0 p-0;
+}
+
+* {
+  box-sizing: border-box;
+}

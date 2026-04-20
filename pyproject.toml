@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pairstrader"
+version = "0.1.0"
+description = "Statistical arbitrage spread predictor powered by TimesFM 2.5"
+requires-python = ">=3.11"
+dependencies = [
+    "timesfm[torch]",
+    "torch>=2.0,<2.3; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic>=2.0",
+    "yfinance",
+    "pandas",
+    "numpy",
+    "scipy",
+    "statsmodels",
+    "pyarrow",
+    "python-dotenv",
+    "psutil",
+    "cachetools",
+    "transformers",
+    "peft",
+    "datasets",
+    "accelerate",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["pipeline", "api"]
+
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
